@@ -6,8 +6,9 @@
 
 <script>
 const state = {
-  attackCount: 10,
+	attackCount: 10,
   hitMod: 4,
+  attackMode: 'normal',
   damageDie: 6,
   damageMod: 6,
   targetAc: 1,
@@ -15,7 +16,7 @@ const state = {
 }
 
 const update = () => {
-  const hits = state.rolls.filter(([hit]) => hit > state.targetAc);
+	const hits = state.rolls.filter(([hit]) => hit > state.targetAc);
   brynja.render(_=>_
   	.style({
     	display: 'flex',
@@ -79,15 +80,71 @@ const update = () => {
         })
       )
     )
+    .child('div', _=>_
+      .style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .child('lable', _=>_
+      	.text('Normal')
+      	.child('input', _=>_
+          .prop('type', 'radio')
+          .prop('name', 'attackMode')
+          .value('normal')
+          .on('change', ev => {
+            state.attackMode = ev.target.value;
+          })
+          .when(state.attackMode === 'normal', _=>_
+          	.prop('checked', 'true')
+          )
+        )
+      )
+      .child('lable', _=>_
+      	.text('Advantage')
+      	.child('input', _=>_
+          .prop('type', 'radio')
+          .prop('name', 'attackMode')
+          .value('advantage')
+          .on('change', ev => {
+            state.attackMode = ev.target.value;
+          })
+          .when(state.attackMode === 'advantage', _=>_
+          	.prop('checked', 'true')
+          )
+        )
+      )
+      .child('lable', _=>_
+      	.text('Disadvantage')
+      	.child('input', _=>_
+          .prop('type', 'radio')
+          .prop('name', 'attackMode')
+          .value('disadvantage')
+          .on('change', ev => {
+            state.attackMode = ev.target.value;
+          })
+          .when(state.attackMode === 'disadvantage', _=>_
+          	.prop('checked', 'true')
+          )
+        )
+      )
+    )
     .child('input', _=>_
       .prop('type', 'button')
       .value('Roll')
       .on('click', () => {
       	state.rolls = Array(state.attackCount).fill(0)
-        	.map(() => [
-          	rollDice(`d20 + ${state.hitMod}`).sum,
-            rollDice(`1d${state.damageDie} + ${state.damageMod}`).sum,
-          ])
+        	.map(() => {
+          	const hitRolls = [
+              rollDice(`d20 + ${state.hitMod}`).sum,
+              rollDice(`d20 + ${state.hitMod}`).sum,
+            ];
+            return [
+              state.attackMode === 'advantage' ? Math.max(...hitRolls) : 
+              state.attackMode === 'disadvantage' ? Math.min(...hitRolls) :
+              hitRolls[0],
+              rollDice(`1d${state.damageDie} + ${state.damageMod}`).sum,
+            ];
+          })
           .sort((a,b) => a[0] - b[0]);
         update();
       })
