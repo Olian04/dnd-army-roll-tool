@@ -1,0 +1,126 @@
+<script src="https://cdn.jsdelivr.net/npm/brynja/cdn/brynja.js"></script>
+<script src="https://unpkg.com/@olian/dice-roller@1.1.2/src/index.js"></script>
+
+<div id="root"></div>
+
+
+<script>
+const state = {
+  attackCount: 10,
+  hitMod: 4,
+  damageDie: 6,
+  damageMod: 6,
+  targetAc: 1,
+  rolls: [],
+}
+
+const update = () => {
+  const hits = state.rolls.filter(([hit]) => hit > state.targetAc);
+  brynja.render(_=>_
+  	.style({
+    	display: 'flex',
+      flexDirection: 'column',
+      gap: '4px',
+      maxWidth: '320px'
+    })
+    .child('lable', _=>_
+    	.style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Damage die: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.damageDie)
+        .on('change', ev => {
+        	state.damageDie = ev.target.value;
+        })
+      )
+    )
+    .child('lable', _=>_
+    	.style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Damage modifier: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.damageMod)
+        .on('change', ev => {
+        	state.damageMod = ev.target.value;
+        })
+      )
+    )
+    .child('lable', _=>_
+    	.style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Hit modifier: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.hitMod)
+        .on('change', ev => {
+        	state.hitMod = ev.target.value;
+        })
+      )
+    )
+    .child('lable', _=>_
+      .style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Number of attackars: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.attackCount)
+        .on('change', ev => {
+        	state.attackCount = ev.target.value;
+        })
+      )
+    )
+    .child('input', _=>_
+      .prop('type', 'button')
+      .value('Roll')
+      .on('click', () => {
+      	state.rolls = Array(state.attackCount).fill(0)
+        	.map(() => [
+          	rollDice(`d20 + ${state.hitMod}`).sum,
+            rollDice(`1d${state.damageDie} + ${state.damageMod}`).sum,
+          ])
+          .sort((a,b) => a[0] - b[0]);
+        update();
+      })
+    )
+    .child('lable', _=>_
+      .style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Target AC: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.targetAc)
+        .on('change', ev => {
+        	state.targetAc = ev.target.value;
+        	update();
+        })
+      )
+    )
+    .child('lable', _=>_
+    	.text('Hits: ')
+      .child('b', _=>_
+      	.text(`${hits.map(d => d[0]).join(', ')}`)
+      )
+    )
+    .child('lable', _=>_
+    	.text('Damage: ')
+      .child('b', _=>_
+      	.text(`${hits.map(d => d[1]).reduce((a,b) => a+b, 0)} = ${hits.map(d => d[1]).join(' + ')}`)
+      )
+    )
+  );
+}
+
+update()
+</script>
