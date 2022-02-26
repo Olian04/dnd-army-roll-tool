@@ -182,7 +182,7 @@ const update = () => {
           })
           .text(hits[i][0])
           .on('click', ev => {
-            state.targetAc = parseFloat(ev.target.innerText);
+            state.targetAc = parseFloat(ev.target.innerText) - 1;
             update();
           })
         )
