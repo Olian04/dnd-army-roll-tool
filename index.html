@@ -122,7 +122,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('advantage')
           .on('change', ev => {
-            state.attackMode = parseInt(ev.target.value, 10);
+            state.attackMode = ev.target.value;
           })
           .when(state.attackMode === 'advantage', _=>_
             .prop('checked', 'true')
@@ -136,7 +136,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('disadvantage')
           .on('change', ev => {
-            state.attackMode = parseInt(ev.target.value, 10);
+            state.attackMode = ev.target.value;
           })
           .when(state.attackMode === 'disadvantage', _=>_
             .prop('checked', 'true')
