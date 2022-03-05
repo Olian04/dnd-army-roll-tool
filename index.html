@@ -37,7 +37,7 @@ const update = () => {
       	.prop('type', 'number')
         .value(state.damageDie)
         .on('change', ev => {
-        	state.damageDie = ev.target.value;
+        	state.damageDie = parseInt(ev.target.value, 10);
         })
       )
     )
@@ -51,7 +51,7 @@ const update = () => {
       	.prop('type', 'number')
         .value(state.damageMod)
         .on('change', ev => {
-        	state.damageMod = ev.target.value;
+        	state.damageMod = parseInt(ev.target.value, 10);
         })
       )
     )
@@ -65,7 +65,7 @@ const update = () => {
       	.prop('type', 'number')
         .value(state.hitMod)
         .on('change', ev => {
-          state.hitMod = ev.target.value;
+          state.hitMod = parseInt(ev.target.value, 10);
         })
       )
     )
@@ -79,7 +79,7 @@ const update = () => {
       	.prop('type', 'number')
         .value(state.attackCount)
         .on('change', ev => {
-          state.attackCount = ev.target.value;
+          state.attackCount = parseInt(ev.target.value, 10);
         })
       )
     )
@@ -95,7 +95,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('normal')
           .on('change', ev => {
-            state.attackMode = ev.target.value;
+            state.attackMode = parseInt(ev.target.value, 10);
           })
           .when(state.attackMode === 'normal', _=>_
             .prop('checked', 'true')
@@ -109,7 +109,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('advantage')
           .on('change', ev => {
-            state.attackMode = ev.target.value;
+            state.attackMode = parseInt(ev.target.value, 10);
           })
           .when(state.attackMode === 'advantage', _=>_
             .prop('checked', 'true')
@@ -123,7 +123,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('disadvantage')
           .on('change', ev => {
-            state.attackMode = ev.target.value;
+            state.attackMode = parseInt(ev.target.value, 10);
           })
           .when(state.attackMode === 'disadvantage', _=>_
             .prop('checked', 'true')
