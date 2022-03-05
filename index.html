@@ -8,7 +8,7 @@
 
 
 <script>
-const state = {
+let state = {
   attackCount: 10,
   hitMod: 4,
   attackMode: 'normal',
@@ -17,6 +17,19 @@ const state = {
   targetAc: 1,
   rolls: [],
 }
+
+const load = () => {
+	const stateJSON = localStorage.getItem('state');
+  if (stateJSON) {
+  	state = JSON.parse(stateJSON);
+  }
+  console.log(state)
+}
+
+const save = () => {
+	localStorage.setItem('state', JSON.stringify(state));
+}
+
 
 const update = () => {
   const hits = state.rolls.filter(([hit]) => hit > state.targetAc);
@@ -95,7 +108,7 @@ const update = () => {
           .prop('name', 'attackMode')
           .value('normal')
           .on('change', ev => {
-            state.attackMode = parseInt(ev.target.value, 10);
+            state.attackMode = ev.target.value;
           })
           .when(state.attackMode === 'normal', _=>_
             .prop('checked', 'true')
@@ -163,7 +176,7 @@ const update = () => {
       	.prop('type', 'number')
         .value(state.targetAc)
         .on('change', ev => {
-          state.targetAc = ev.target.value;
+          state.targetAc = parseInt(ev.target.value, 10);
           update();
         })
       )
@@ -182,7 +195,7 @@ const update = () => {
           })
           .text(hits[i][0])
           .on('click', ev => {
-            state.targetAc = parseFloat(ev.target.innerText) - 1;
+            state.targetAc = parseInt(ev.target.innerText, 10) - 1;
             update();
           })
         )
@@ -195,7 +208,9 @@ const update = () => {
       )
     )
   );
+  save();
 }
 
-update()
+load();
+update();
 </script>
