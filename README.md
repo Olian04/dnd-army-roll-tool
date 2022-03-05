@@ -4,4 +4,4 @@ Custom dice rolling tool for our homerule hoard mechanic.
 
 Live: https://olian04.github.io/dnd-army-roll-tool/
 
-Fiddle: https://jsfiddle.net/unwLc8dt/11/
+Fiddle: https://jsfiddle.net/unwLc8dt/14/
