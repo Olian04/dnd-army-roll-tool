@@ -23,11 +23,11 @@ const load = () => {
   if (stateJSON) {
   	state = JSON.parse(stateJSON);
   }
-  console.log(state)
 }
 
 const save = () => {
 	localStorage.setItem('state', JSON.stringify(state));
+  console.log('saved:', state);
 }
 
 
@@ -51,6 +51,7 @@ const update = () => {
         .value(state.damageDie)
         .on('change', ev => {
         	state.damageDie = parseInt(ev.target.value, 10);
+          update();
         })
       )
     )
@@ -65,6 +66,7 @@ const update = () => {
         .value(state.damageMod)
         .on('change', ev => {
         	state.damageMod = parseInt(ev.target.value, 10);
+          update();
         })
       )
     )
@@ -79,6 +81,7 @@ const update = () => {
         .value(state.hitMod)
         .on('change', ev => {
           state.hitMod = parseInt(ev.target.value, 10);
+          update();
         })
       )
     )
@@ -93,6 +96,7 @@ const update = () => {
         .value(state.attackCount)
         .on('change', ev => {
           state.attackCount = parseInt(ev.target.value, 10);
+          update();
         })
       )
     )
@@ -109,6 +113,7 @@ const update = () => {
           .value('normal')
           .on('change', ev => {
             state.attackMode = ev.target.value;
+            update();
           })
           .when(state.attackMode === 'normal', _=>_
             .prop('checked', 'true')
@@ -123,6 +128,7 @@ const update = () => {
           .value('advantage')
           .on('change', ev => {
             state.attackMode = ev.target.value;
+            update();
           })
           .when(state.attackMode === 'advantage', _=>_
             .prop('checked', 'true')
@@ -137,6 +143,7 @@ const update = () => {
           .value('disadvantage')
           .on('change', ev => {
             state.attackMode = ev.target.value;
+            update();
           })
           .when(state.attackMode === 'disadvantage', _=>_
             .prop('checked', 'true')
