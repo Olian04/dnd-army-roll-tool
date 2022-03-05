@@ -6,15 +6,31 @@
 <h3>DnD Army Roll Tool</h3>
 <div id="root"></div>
 
+<style>
+body {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+}
+</style>
 
 <script>
 let state = {
   attackCount: 10,
   hitMod: 4,
   attackMode: 'normal',
+  numberOfDamageDice: 1,
   damageDie: 6,
   damageMod: 6,
   targetAc: 1,
+  nat20IsCrit: false,
+  nat1IsMiss: false,
   rolls: [],
 }
 
@@ -30,16 +46,62 @@ const save = () => {
   console.log('saved:', state);
 }
 
+const randomBetween = (min, max) => Math.floor(Math.random()*(max-min+1)+min);
+
 
 const update = () => {
-  const hits = state.rolls.filter(([hit]) => hit > state.targetAc);
+	const hits = state.rolls
+    .map(([hitRolls, damageRolls]) => {
+  	  const hitRoll = (
+        state.attackMode === 'advantage' ? Math.max(...hitRolls) :
+        state.attackMode === 'disadvantage' ? Math.min(...hitRolls) :
+        hitRolls[0]
+      );
+      const isCrit = hitRoll === 20 && state.nat20IsCrit;
+      const isNatOne = hitRoll === 1 && state.nat1IsMiss;
+      const damage = damageRolls
+      	.filter((_,i) => isCrit || i % 2 === 0)
+      	.reduce((a,b) => a+b, 0);
+      return [
+        hitRoll + state.hitMod,
+        damage,
+        isCrit,
+        isNatOne,
+      ];
+    })
+    .filter(([hit,_,isCrit,isNatOne]) => {
+    	if (isCrit) {
+      	return true
+      }
+      if (isNatOne) {
+      	return false
+      }
+      return hit > state.targetAc;
+    })
+    .sort((a,b) => a[0] - b[0]);
+  
   brynja.render(_=>_
     .style({
       display: 'flex',
       flexDirection: 'column',
       gap: '4px',
-      maxWidth: '320px'
+      maxWidth: '320px',
     })
+    .child('lable', _=>_
+    	.style({
+      	display: 'flex',
+        justifyContent: 'space-between'
+      })
+      .text('Number of damage dice: ')
+      .child('input', _=>_
+      	.prop('type', 'number')
+        .value(state.numberOfDamageDice)
+        .on('change', ev => {
+        	state.numberOfDamageDice = parseInt(ev.target.value, 10);
+          update();
+        })
+      )
+    )
     .child('lable', _=>_
     	.style({
       	display: 'flex',
@@ -100,6 +162,26 @@ const update = () => {
         })
       )
     )
+    .child('input', _=>_
+      .prop('type', 'button')
+      .value('Roll')
+      .on('click', () => {
+      	state.rolls = Array(state.attackCount).fill(0)
+          .map(() => {
+            const hitRolls = [
+              randomBetween(1,20),
+              randomBetween(1,20),
+            ];
+            const damageRolls = Array(state.numberOfDamageDice * 2).fill(0)
+            	.map(() => randomBetween(1, state.damageDie) + state.damageMod);
+            return [
+            	hitRolls,
+              damageRolls,
+            ]; 
+          });
+        update();
+      })
+    )
     .child('div', _=>_
       .style({
       	display: 'flex',
@@ -151,27 +233,37 @@ const update = () => {
         )
       )
     )
-    .child('input', _=>_
-      .prop('type', 'button')
-      .value('Roll')
-      .on('click', () => {
-      	state.targetAc = 1;
-      	state.rolls = Array(state.attackCount).fill(0)
-          .map(() => {
-            const hitRolls = [
-              rollDice(`d20 + ${state.hitMod}`).sum,
-              rollDice(`d20 + ${state.hitMod}`).sum,
-            ];
-            return [
-              state.attackMode === 'advantage' ? Math.max(...hitRolls) : 
-              state.attackMode === 'disadvantage' ? Math.min(...hitRolls) :
-              hitRolls[0],
-              rollDice(`1d${state.damageDie} + ${state.damageMod}`).sum,
-            ];
-          })
-          .sort((a,b) => a[0] - b[0]);
-        update();
+    .child('div', _=>_
+      .style({
+      	display: 'flex',
+        justifyContent: 'space-between'
       })
+      .child('lable', _=>_
+      	.text('Nat-1 is miss')
+      	.child('input', _=>_
+          .prop('type', 'checkbox')
+          .on('change', ev => {
+            state.nat1IsMiss = !state.nat1IsMiss;
+            update();
+          })
+          .when(state.nat1IsMiss, _=>_
+            .prop('checked', 'true')
+          )
+        )
+      )
+      .child('lable', _=>_
+      	.text('Nat-20 is crit')
+      	.child('input', _=>_
+          .prop('type', 'checkbox')
+          .on('change', ev => {
+            state.nat20IsCrit = !state.nat20IsCrit;
+            update();
+          })
+          .when(state.nat20IsCrit, _=>_
+            .prop('checked', 'true')
+          )
+        )
+      )
     )
     .child('lable', _=>_
       .style({
@@ -205,13 +297,38 @@ const update = () => {
             state.targetAc = parseInt(ev.target.innerText, 10) - 1;
             update();
           })
+          .when(hits[i][2], _=>_
+          	.style({
+            	color: 'green'
+            })
+          )
         )
       )
     )
     .child('lable', _=>_
       .text('Damage: ')
       .child('b', _=>_
-      	.text(`${hits.map(d => d[1]).reduce((a,b) => a+b, 0)} = ${hits.map(d => d[1]).join(' + ')}`)
+      	.text(`${hits.map(d => d[1]).reduce((a,b) => a+b, 0)} = `)
+        .children('span', hits.length, (_,i)=>_
+          .style({
+            padding: '2px',
+            '::before': {
+            	content: '"+ "',
+            },
+            ':first-child::before': {
+            	content: '""',
+              display: 'none',
+            }
+          })
+          .child('span', _=>_
+            .text(hits[i][1])
+            .when(hits[i][2], _=>_
+          	  .style({
+            	  color: 'green'
+              })
+            )
+          )
+        )
       )
     )
   );
